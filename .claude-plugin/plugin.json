@@ -1,0 +1,21 @@
+{
+  "name": "manager-slides",
+  "description": "Generate and redesign beautiful slide decks and reports for management audiences. Design choices are measured from a corpus of 236 real reports, not guessed.",
+  "version": "0.1.0",
+  "author": {
+    "name": "tranquansp"
+  },
+  "homepage": "https://github.com/tranquansp/manager-slides",
+  "repository": "https://github.com/tranquansp/manager-slides",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "slides",
+    "deck",
+    "report",
+    "management",
+    "presentation",
+    "redesign",
+    "design"
+  ]
+}

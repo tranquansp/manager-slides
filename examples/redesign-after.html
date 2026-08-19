@@ -1,0 +1,237 @@
+<!--
+  DECK SHELL — starting point for 16:9 slide decks. For scroll reports use report.html.
+
+  READ BEFORE EDITING
+  ───────────────────
+  1. Type scale. Sizes are in container-query units (cqh = 1% of the stage height), so
+     text scales with the slide, not the browser window. The title/body ratio is ~2.4 —
+     landscape decks in the corpus run higher than portrait (1.94), up to ~3.1. Keep the
+     ratio ≥1.9; to fit more, cut words per slide, not the ratio.
+
+  2. Colors use the same three-state token system as report.html. Apply a styling preset
+     by overriding --accent etc. in all three states (:root, the dark @media, and
+     [data-theme="dark"]). Never write a raw color inside an @media/[data-theme] block.
+
+  3. Mechanics for scripts/deck_to_pdf.py: each slide is a <section class="slide">, and
+     window.go(i) shows slide i. The exporter calls go(i) and screenshots each slide, so
+     what you see is what prints. Do not rely on @media print for a deck.
+
+  4. Component classes (.kpis .kpi .tw table .callout .card .two .three) match report.html,
+     so the HTML in references/archetypes.md is portable between the two shells.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Q3 Expansion Proposal (after — Keynote preset)</title>
+<style>
+:root{
+  /* Keynote preset */
+  --paper:#FFFFFF;  --surface:#FFFFFF;  --raised:#F0F2F6;
+  --ink:#0B0D12;    --body:#20242E;     --muted:#5A6170;  --line:#DCE0E8;
+  --accent:#1E63D6;      --accent-soft:#DCE7FB;
+  --accent-2:#0FA37F;    --accent-2-soft:#D6F1E8;
+  --good:#1F6B45;  --warn:#8A6410;  --bad:#9B2C2C;
+  --stage:#0B0E14;   /* letterbox behind the slide */
+  --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F131A;  --surface:#161B24;  --raised:#1E242F;
+    --ink:#E8EBF1;    --body:#C2C9D4;     --muted:#8B95A5;  --line:#2A313D;
+    --accent:#7FA8DE;      --accent-soft:#1B2B44;
+    --accent-2:#D9A845;    --accent-2-soft:#332914;
+    --good:#5CB98A;  --warn:#D9A845;  --bad:#E08585;  --stage:#05070B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F131A;  --surface:#161B24;  --raised:#1E242F;
+  --ink:#E8EBF1;    --body:#C2C9D4;     --muted:#8B95A5;  --line:#2A313D;
+  --accent:#7FA8DE;      --accent-soft:#1B2B44;
+  --accent-2:#D9A845;    --accent-2-soft:#332914;
+  --good:#5CB98A;  --warn:#D9A845;  --bad:#E08585;  --stage:#05070B;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%; margin:0}
+body{
+  background:var(--stage); color:var(--body);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+
+/* 16:9 stage that fits the viewport (fills it exactly at 16:9, letterboxes otherwise) */
+.deck{
+  position:relative; width:min(100vw,177.78vh); aspect-ratio:16/9;
+  background:var(--paper); overflow:hidden; container-type:size;
+  box-shadow:0 0 60px rgba(0,0,0,.4);
+}
+
+.slide{
+  position:absolute; inset:0; padding:7cqh 7cqw;
+  display:flex; flex-direction:column; gap:2.4cqh;
+  opacity:0; visibility:hidden; transition:opacity .28s ease;
+}
+.slide.active{opacity:1; visibility:visible}
+.slide.center{justify-content:center; align-items:flex-start}
+
+/* ── TYPE — sizes in cqh so they scale with the stage; ratio ~2.4 ───────── */
+.eyebrow{
+  font:600 1.5cqh/1 var(--mono); letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted); margin:0;
+}
+h1{font:600 8.5cqh/1.02 var(--serif); color:var(--ink); letter-spacing:-.02em; margin:0; text-wrap:balance}
+h2{font:600 6cqh/1.06 var(--serif); color:var(--ink); margin:0; text-wrap:balance}      /* 6 / 2.5 = 2.4 */
+h3{font:600 3.2cqh/1.15 var(--serif); color:var(--ink); margin:0 0 .6cqh}
+h1,h2,h3{font-family:var(--sans); letter-spacing:-.02em}   /* Keynote: sans headings */
+p{font-size:2.5cqh; line-height:1.45; margin:0 0 1.4cqh; max-width:62ch}
+.lede{font-size:3.2cqh; color:var(--body); max-width:56ch}
+.sub{font-size:2.1cqh; color:var(--muted); margin:0}
+.source{margin-top:auto; font:500 1.5cqh/1 var(--mono); color:var(--muted)}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.hi{color:var(--ink); font-weight:600}
+
+/* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+.two{display:grid; grid-template-columns:1fr 1fr; gap:5cqw; align-items:center; flex:1}
+.three{display:grid; grid-template-columns:repeat(3,1fr); gap:3cqw; align-items:stretch; align-content:center; grid-auto-rows:min-content; flex:1}
+.body-fill{flex:1; display:flex; flex-direction:column; justify-content:center}
+
+.card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:.8cqh; padding:3cqh 2.6cqw; display:flex; flex-direction:column; gap:1cqh;
+}
+.card h3{margin:0}
+.card p{font-size:2.1cqh; margin:0}
+
+/* ── KPIs ───────────────────────────────────────────────────────────────── */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(20cqw,1fr)); gap:2.5cqw; flex:1; align-content:center}
+.kpi{
+  background:var(--surface); border:1px solid var(--line); border-radius:.8cqh;
+  padding:3cqh 2.4cqw; display:flex; flex-direction:column; gap:.6cqh;
+}
+.kpi .v{font:600 9cqh/1 var(--serif); color:var(--ink); font-variant-numeric:tabular-nums}
+.kpi .l{font-size:2cqh; color:var(--muted)}
+.kpi .d{font:500 1.8cqh/1 var(--mono); color:var(--muted); margin-top:.4cqh}
+.kpi .d.up{color:var(--good)} .kpi .d.down{color:var(--bad)}
+
+/* ── TABLE (keep to ~8 rows on a slide) ─────────────────────────────────── */
+.tw{overflow:hidden; border:1px solid var(--line); border-radius:.8cqh; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:2.1cqh}
+th,td{padding:1.3cqh 1.6cqw; text-align:left; border-bottom:1px solid var(--line)}
+thead th{
+  font:600 1.5cqh/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase;
+  color:var(--muted); background:var(--raised); white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+tbody tr.total td{border-top:.3cqh solid var(--ink); font-weight:600; color:var(--ink)}
+td.n,th.n{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+
+/* ── CALLOUT (takeaway / recommendation) ────────────────────────────────── */
+.callout{
+  background:var(--accent-soft); border-left:.5cqh solid var(--accent);
+  padding:2.6cqh 2.6cqw; border-radius:0 .6cqh .6cqh 0;
+}
+.callout p{margin:0; color:var(--ink); font-size:2.8cqh}
+.callout.alt{background:var(--accent-2-soft); border-left-color:var(--accent-2)}
+
+/* ── CHART ──────────────────────────────────────────────────────────────── */
+.chart{margin:0} .chart svg{width:100%; height:auto; display:block}
+
+/* ── NAV ────────────────────────────────────────────────────────────────── */
+.nav{position:absolute; right:2cqw; bottom:1.8cqh; display:flex; gap:1.2cqw; align-items:center; z-index:5}
+.counter{font:600 1.6cqh/1 var(--mono); color:var(--muted); font-variant-numeric:tabular-nums}
+.navarrow{
+  width:4cqh; height:4cqh; border:1px solid var(--line); background:var(--surface);
+  color:var(--ink); border-radius:50%; cursor:pointer; font-size:1.8cqh; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+}
+.navarrow:hover{border-color:var(--accent); color:var(--accent)}
+.progress{position:absolute; left:0; top:0; height:.6cqh; background:var(--accent); z-index:5; transition:width .28s ease}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+
+<div class="deck" id="deck">
+
+  <div class="progress" id="progress"></div>
+
+  <!-- 1 · COVER — takeaway title, not "Q3 Expansion Proposal" -->
+  <section class="slide center active">
+    <p class="eyebrow">Q3 Expansion Proposal · Board · August 2026</p>
+    <h1>Open 40 stores in H2 for $22M in new revenue</h1>
+    <p class="lede">We are under-stored versus competitors, with a proven format and a site pipeline. Payback is 14 months.</p>
+    <p class="source">Prepared for the Board</p>
+  </section>
+
+  <!-- 2 · HEADLINE KPIs — the proposal at a glance (was a table on slide 1) -->
+  <section class="slide">
+    <p class="eyebrow">The proposal at a glance</p>
+    <h2>40 stores · $8M capex · 14-month payback</h2>
+    <div class="kpis">
+      <div class="kpi"><span class="v">40</span><span class="l">New stores</span><span class="d">H2 2026</span></div>
+      <div class="kpi"><span class="v">$8.0M</span><span class="l">Capex</span><span class="d">across 3 regions</span></div>
+      <div class="kpi"><span class="v">$22.0M</span><span class="l">Year-1 revenue</span><span class="d up">incremental</span></div>
+      <div class="kpi"><span class="v">14 mo</span><span class="l">Payback</span><span class="d">base case</span></div>
+    </div>
+    <p class="source">Estimates: commercial planning, August 2026</p>
+  </section>
+
+  <!-- 3 · RATIONALE — cards (was an emoji bullet list) -->
+  <section class="slide">
+    <p class="eyebrow">Why now</p>
+    <h2>Three reasons to move this half</h2>
+    <div class="three">
+      <div class="card"><h3>Under-stored</h3><p>The market is growing and we trail competitors on store density in every target region.</p></div>
+      <div class="card"><h3>Proven format</h3><p>The current store format is already profitable; this is replication, not a new bet.</p></div>
+      <div class="card"><h3>Sites ready</h3><p>A vetted pipeline of sites lets us open on schedule in the second half.</p></div>
+    </div>
+    <p class="source">Source: market share study; real-estate pipeline</p>
+  </section>
+
+  <!-- 4 · APPENDIX — the regional table, moved off slide 1 (descriptive title) -->
+  <section class="slide">
+    <p class="eyebrow">Appendix</p>
+    <h2>Regional plan</h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Region</th><th class="n">New stores</th><th class="n">Capex</th><th class="n">Yr-1 revenue</th></tr></thead>
+        <tbody>
+          <tr><td>North</td><td class="n">16</td><td class="n">3.2</td><td class="n">8.8</td></tr>
+          <tr><td>Central</td><td class="n">10</td><td class="n">2.0</td><td class="n">5.6</td></tr>
+          <tr><td>South</td><td class="n">14</td><td class="n">2.8</td><td class="n">7.6</td></tr>
+          <tr class="total"><td>Total</td><td class="n">40</td><td class="n">8.0</td><td class="n">22.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="source">Unit: $M</p>
+  </section>
+
+  <!-- 5 · THE ASK -->
+  <section class="slide center">
+    <p class="eyebrow">The ask</p>
+    <div class="callout"><p><strong>Approve $8M of capex to open 40 stores in H2 2026.</strong> Decision needed by end of August to hit H2 openings.</p></div>
+  </section>
+
+  <div class="nav">
+    <span class="counter" id="counter">1 / 5</span>
+    <button class="navarrow left" aria-label="Previous slide" onclick="go(cur-1)">‹</button>
+    <button class="navarrow right" aria-label="Next slide" onclick="go(cur+1)">›</button>
+  </div>
+
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = 0;
+  window.go = function (i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, k) => s.classList.toggle('active', k === cur));
+    document.getElementById('counter').textContent = (cur + 1) + ' / ' + slides.length;
+    document.getElementById('progress').style.width = ((cur + 1) / slides.length * 100) + '%';
+  };
+  addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { go(cur + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(cur - 1); e.preventDefault(); }
+  });
+  go(0);
+</script>

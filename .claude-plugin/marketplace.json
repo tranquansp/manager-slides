@@ -1,0 +1,18 @@
+{
+  "name": "manager-slides",
+  "description": "A Claude Code plugin for building and redesigning management slide decks and reports, with design rules measured from real reports.",
+  "owner": {
+    "name": "tranquansp"
+  },
+  "plugins": [
+    {
+      "name": "manager-slides",
+      "description": "Generate and redesign beautiful slide decks and reports for management audiences.",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "tranquansp"
+      }
+    }
+  ]
+}

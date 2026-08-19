@@ -1,0 +1,288 @@
+<!--
+  DECK SHELL — starting point for 16:9 slide decks. For scroll reports use report.html.
+
+  READ BEFORE EDITING
+  ───────────────────
+  1. Type scale. Sizes are in container-query units (cqh = 1% of the stage height), so
+     text scales with the slide, not the browser window. The title/body ratio is ~2.4 —
+     landscape decks in the corpus run higher than portrait (1.94), up to ~3.1. Keep the
+     ratio ≥1.9; to fit more, cut words per slide, not the ratio.
+
+  2. Colors use the same three-state token system as report.html. Apply a styling preset
+     by overriding --accent etc. in all three states (:root, the dark @media, and
+     [data-theme="dark"]). Never write a raw color inside an @media/[data-theme] block.
+
+  3. Mechanics for scripts/deck_to_pdf.py: each slide is a <section class="slide">, and
+     window.go(i) shows slide i. The exporter calls go(i) and screenshots each slide, so
+     what you see is what prints. Do not rely on @media print for a deck.
+
+  4. Component classes (.kpis .kpi .tw table .callout .card .two .three) match report.html,
+     so the HTML in references/archetypes.md is portable between the two shells.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monthly Business Review — July 2026</title>
+<style>
+:root{
+  --paper:#F6F7F9;  --surface:#FFFFFF;  --raised:#EDEFF3;
+  --ink:#12161F;    --body:#2C3340;     --muted:#5A6474;  --line:#D9DDE4;
+  --accent:#17427A;      --accent-soft:#DCE5F1;
+  --accent-2:#8A5D0E;    --accent-2-soft:#F0E6D0;
+  --good:#1F6B45;  --warn:#8A6410;  --bad:#9B2C2C;
+  --stage:#0B0E14;   /* letterbox behind the slide */
+  --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F131A;  --surface:#161B24;  --raised:#1E242F;
+    --ink:#E8EBF1;    --body:#C2C9D4;     --muted:#8B95A5;  --line:#2A313D;
+    --accent:#7FA8DE;      --accent-soft:#1B2B44;
+    --accent-2:#D9A845;    --accent-2-soft:#332914;
+    --good:#5CB98A;  --warn:#D9A845;  --bad:#E08585;  --stage:#05070B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F131A;  --surface:#161B24;  --raised:#1E242F;
+  --ink:#E8EBF1;    --body:#C2C9D4;     --muted:#8B95A5;  --line:#2A313D;
+  --accent:#7FA8DE;      --accent-soft:#1B2B44;
+  --accent-2:#D9A845;    --accent-2-soft:#332914;
+  --good:#5CB98A;  --warn:#D9A845;  --bad:#E08585;  --stage:#05070B;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%; margin:0}
+body{
+  background:var(--stage); color:var(--body);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+
+/* 16:9 stage that fits the viewport (fills it exactly at 16:9, letterboxes otherwise) */
+.deck{
+  position:relative; width:min(100vw,177.78vh); aspect-ratio:16/9;
+  background:var(--paper); overflow:hidden; container-type:size;
+  box-shadow:0 0 60px rgba(0,0,0,.4);
+}
+
+.slide{
+  position:absolute; inset:0; padding:7cqh 7cqw;
+  display:flex; flex-direction:column; gap:2.4cqh;
+  opacity:0; visibility:hidden; transition:opacity .28s ease;
+}
+.slide.active{opacity:1; visibility:visible}
+.slide.center{justify-content:center; align-items:flex-start}
+
+/* ── TYPE — sizes in cqh so they scale with the stage; ratio ~2.4 ───────── */
+.eyebrow{
+  font:600 1.5cqh/1 var(--mono); letter-spacing:.16em; text-transform:uppercase;
+  color:var(--muted); margin:0;
+}
+h1{font:600 8.5cqh/1.02 var(--serif); color:var(--ink); letter-spacing:-.02em; margin:0; text-wrap:balance}
+h2{font:600 6cqh/1.06 var(--serif); color:var(--ink); margin:0; text-wrap:balance}      /* 6 / 2.5 = 2.4 */
+h3{font:600 3.2cqh/1.15 var(--serif); color:var(--ink); margin:0 0 .6cqh}
+p{font-size:2.5cqh; line-height:1.45; margin:0 0 1.4cqh; max-width:62ch}
+.lede{font-size:3.2cqh; color:var(--body); max-width:56ch}
+.sub{font-size:2.1cqh; color:var(--muted); margin:0}
+.source{margin-top:auto; font:500 1.5cqh/1 var(--mono); color:var(--muted)}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.hi{color:var(--ink); font-weight:600}
+
+/* ── LAYOUT ─────────────────────────────────────────────────────────────── */
+.two{display:grid; grid-template-columns:1fr 1fr; gap:5cqw; align-items:center; flex:1}
+.three{display:grid; grid-template-columns:repeat(3,1fr); gap:3cqw; align-items:stretch; align-content:center; grid-auto-rows:min-content; flex:1}
+.body-fill{flex:1; display:flex; flex-direction:column; justify-content:center}
+
+.card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:.8cqh; padding:3cqh 2.6cqw; display:flex; flex-direction:column; gap:1cqh;
+}
+.card h3{margin:0}
+.card p{font-size:2.1cqh; margin:0}
+
+/* ── KPIs ───────────────────────────────────────────────────────────────── */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(20cqw,1fr)); gap:2.5cqw; flex:1; align-content:center}
+.kpi{
+  background:var(--surface); border:1px solid var(--line); border-radius:.8cqh;
+  padding:3cqh 2.4cqw; display:flex; flex-direction:column; gap:.6cqh;
+}
+.kpi .v{font:600 9cqh/1 var(--serif); color:var(--ink); font-variant-numeric:tabular-nums}
+.kpi .l{font-size:2cqh; color:var(--muted)}
+.kpi .d{font:500 1.8cqh/1 var(--mono); color:var(--muted); margin-top:.4cqh}
+.kpi .d.up{color:var(--good)} .kpi .d.down{color:var(--bad)}
+
+/* ── TABLE (keep to ~8 rows on a slide) ─────────────────────────────────── */
+.tw{overflow:hidden; border:1px solid var(--line); border-radius:.8cqh; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:2.1cqh}
+th,td{padding:1.3cqh 1.6cqw; text-align:left; border-bottom:1px solid var(--line)}
+thead th{
+  font:600 1.5cqh/1.2 var(--mono); letter-spacing:.06em; text-transform:uppercase;
+  color:var(--muted); background:var(--raised); white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+tbody tr.total td{border-top:.3cqh solid var(--ink); font-weight:600; color:var(--ink)}
+td.n,th.n{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+
+/* ── CALLOUT (takeaway / recommendation) ────────────────────────────────── */
+.callout{
+  background:var(--accent-soft); border-left:.5cqh solid var(--accent);
+  padding:2.6cqh 2.6cqw; border-radius:0 .6cqh .6cqh 0;
+}
+.callout p{margin:0; color:var(--ink); font-size:2.8cqh}
+.callout.alt{background:var(--accent-2-soft); border-left-color:var(--accent-2)}
+
+/* ── CHART ──────────────────────────────────────────────────────────────── */
+.chart{margin:0} .chart svg{width:100%; height:auto; display:block}
+
+/* ── NAV ────────────────────────────────────────────────────────────────── */
+.nav{position:absolute; right:2cqw; bottom:1.8cqh; display:flex; gap:1.2cqw; align-items:center; z-index:5}
+.counter{font:600 1.6cqh/1 var(--mono); color:var(--muted); font-variant-numeric:tabular-nums}
+.navarrow{
+  width:4cqh; height:4cqh; border:1px solid var(--line); background:var(--surface);
+  color:var(--ink); border-radius:50%; cursor:pointer; font-size:1.8cqh; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+}
+.navarrow:hover{border-color:var(--accent); color:var(--accent)}
+.progress{position:absolute; left:0; top:0; height:.6cqh; background:var(--accent); z-index:5; transition:width .28s ease}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+
+<div class="deck" id="deck">
+
+  <div class="progress" id="progress"></div>
+
+  <!-- 1 · COVER -->
+  <section class="slide center active">
+    <p class="eyebrow">Monthly Business Review · July 2026</p>
+    <h1>Sales missed plan by 4 points</h1>
+    <p class="lede">Revenue reached 96% of target on soft e-commerce while stores over-delivered. This deck diagnoses the gap and asks for one decision.</p>
+    <p class="source">Commercial · CEO review · 2026-08-05</p>
+  </section>
+
+  <!-- 2 · HEADLINE KPIs — no deck opens with a table -->
+  <section class="slide">
+    <p class="eyebrow">Where we stand</p>
+    <h2>July revenue $115.2M — 96% of plan</h2>
+    <div class="kpis">
+      <div class="kpi"><span class="v">$115.2M</span><span class="l">July revenue</span><span class="d down">−4% vs plan</span></div>
+      <div class="kpi"><span class="v">96%</span><span class="l">Plan attainment</span><span class="d">Plan $120.0M</span></div>
+      <div class="kpi"><span class="v">24.1%</span><span class="l">Gross margin</span><span class="d up">+0.8pt YoY</span></div>
+      <div class="kpi"><span class="v">41%</span><span class="l">Repeat rate</span><span class="d up">+2pt YoY</span></div>
+    </div>
+    <p class="source">Source: sales system, closed 2026-08-04</p>
+  </section>
+
+  <!-- 3 · CHART + READING — the driver -->
+  <section class="slide">
+    <p class="eyebrow">Why</p>
+    <h2>The miss is entirely e-commerce</h2>
+    <div class="two">
+      <figure class="chart">
+        <svg viewBox="0 0 620 320" role="img" aria-label="Plan attainment by channel, July 2026">
+          <!-- target line at 100% -->
+          <line x1="52" y1="60" x2="600" y2="60" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4"/>
+          <text x="600" y="54" text-anchor="end" font-family="ui-monospace,monospace" font-size="12" fill="var(--muted)">plan 100%</text>
+          <!-- baseline -->
+          <line x1="52" y1="260" x2="600" y2="260" stroke="var(--line)" stroke-width="1.5"/>
+          <!-- bars: Stores 103, E-com 85, Wholesale 101, Partner 98 -->
+          <rect x="80"  y="54" width="90" height="206" rx="2" fill="var(--accent)"/>
+          <rect x="210" y="90" width="90" height="170" rx="2" fill="var(--bad)"/>
+          <rect x="340" y="58" width="90" height="202" rx="2" fill="var(--accent)"/>
+          <rect x="470" y="64" width="90" height="196" rx="2" fill="var(--accent)"/>
+          <!-- direct value labels -->
+          <g font-family="ui-monospace,monospace" font-size="16" font-weight="600" fill="var(--ink)" text-anchor="middle">
+            <text x="125" y="44">103%</text>
+            <text x="255" y="80" fill="var(--bad)">85%</text>
+            <text x="385" y="48">101%</text>
+            <text x="515" y="54">98%</text>
+          </g>
+          <!-- channel labels -->
+          <g font-family="var(--sans)" font-size="14" fill="var(--muted)" text-anchor="middle">
+            <text x="125" y="284">Stores</text>
+            <text x="255" y="284">E-commerce</text>
+            <text x="385" y="284">Wholesale</text>
+            <text x="515" y="284">Partner</text>
+          </g>
+        </svg>
+      </figure>
+      <div class="body-fill">
+        <p>Stores hit <span class="hi">103%</span> of plan; e-commerce landed at <span class="hi">85%</span> — a $6.8M shortfall that accounts for the entire gap.</p>
+        <p>Pharmacy and wholesale were on or above plan. There is no broad demand problem.</p>
+      </div>
+    </div>
+    <p class="source">Source: channel P&amp;L, July 2026</p>
+  </section>
+
+  <!-- 4 · ROOT CAUSE — cards -->
+  <section class="slide">
+    <p class="eyebrow">Root cause</p>
+    <h2>Conversion dropped after the June app update</h2>
+    <div class="three">
+      <div class="card"><h3>Conversion −0.9pt</h3><p>Checkout drop-off rose the week the app 4.2 release shipped.</p></div>
+      <div class="card"><h3>Traffic flat</h3><p>Sessions held steady — this is not a demand or spend problem.</p></div>
+      <div class="card"><h3>AOV −3%</h3><p>Basket size slipped as bundle recommendations stopped rendering.</p></div>
+    </div>
+    <p class="source">Source: web analytics; app release notes 4.2</p>
+  </section>
+
+  <!-- 5 · OPTIONS — comparison -->
+  <section class="slide">
+    <p class="eyebrow">Options</p>
+    <h2>Two ways to recover the second half</h2>
+    <div class="two">
+      <div class="card"><h3>A · Promo push</h3><p>Discount to buy back volume. Fast, but costs ~1.5pt of margin and does not fix the leak.</p></div>
+      <div class="card"><h3>B · App fix + retarget</h3><p>Two-week engineering sprint to restore checkout and bundles, then retarget lapsed carts. Slower, addresses the cause.</p></div>
+    </div>
+    <p class="source">Estimates: commercial + engineering</p>
+  </section>
+
+  <!-- 6 · APPENDIX — table_dense (descriptive title) -->
+  <section class="slide">
+    <p class="eyebrow">Appendix</p>
+    <h2>Channel detail</h2>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Channel</th><th class="n">Plan</th><th class="n">Actual</th><th class="n">Attain</th></tr></thead>
+        <tbody>
+          <tr><td>Stores</td><td class="n">62.0</td><td class="n">63.9</td><td class="n hi">103%</td></tr>
+          <tr><td>E-commerce</td><td class="n">45.0</td><td class="n">38.2</td><td class="n">85%</td></tr>
+          <tr><td>Wholesale</td><td class="n">8.0</td><td class="n">8.1</td><td class="n">101%</td></tr>
+          <tr><td>Partner</td><td class="n">5.0</td><td class="n">4.9</td><td class="n">98%</td></tr>
+          <tr class="total"><td>Total</td><td class="n">120.0</td><td class="n">115.2</td><td class="n">96%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="source">Unit: $M · Source: sales system, closed 2026-08-04</p>
+  </section>
+
+  <!-- 7 · DECISION -->
+  <section class="slide center">
+    <p class="eyebrow">Recommendation</p>
+    <div class="callout"><p><strong>Fund the app-fix sprint ($0.4M); hold promo in reserve.</strong> Approve by Aug 12 to recover an estimated $4–5M in H2.</p></div>
+  </section>
+
+  <div class="nav">
+    <span class="counter" id="counter">1 / 7</span>
+    <button class="navarrow left" aria-label="Previous slide" onclick="go(cur-1)">‹</button>
+    <button class="navarrow right" aria-label="Next slide" onclick="go(cur+1)">›</button>
+  </div>
+
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let cur = 0;
+  window.go = function (i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, k) => s.classList.toggle('active', k === cur));
+    document.getElementById('counter').textContent = (cur + 1) + ' / ' + slides.length;
+    document.getElementById('progress').style.width = ((cur + 1) / slides.length * 100) + '%';
+  };
+  addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { go(cur + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { go(cur - 1); e.preventDefault(); }
+  });
+  go(0);
+</script>

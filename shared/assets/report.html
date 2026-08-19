@@ -1,0 +1,237 @@
+<!--
+  REPORT SHELL — starting point for every HTML/PDF *report* (vertical scroll).
+  For slide decks use deck.html instead.
+
+  READ BEFORE EDITING
+  ───────────────────
+  1. The type scale is set to a 1.95 ratio between h2 and body — this is the single
+     strongest finding in the corpus (well-designed group 1.94 · typical group 1.16).
+     Do not lower this ratio. To fit more on a page, reduce spacing or body size but
+     keep the ratio.
+
+  2. Colors are declared AT THE TOKEN LAYER, three theme states:
+       :root                                    → full light palette
+       @media (prefers-color-scheme: dark)      → override tokens only, guarded
+         :root:not([data-theme="light"])
+       :root[data-theme="dark"]                 → override again for a theme toggle
+     Add any new color to all three. Writing a color directly inside an @media or
+     [data-theme] block is the bug that shows one theme's text on the other's ground.
+
+  3. Change --accent and --accent-2 to fit the report (or apply a styling preset).
+     Two-thirds of corpus pages use ONE accent color — do not add a second unless the
+     report has multiple data series.
+
+  4. The @media print block handles A4, page breaks, and dropping dark mode. Re-check
+     after printing: tables not cut mid-row, no blank pages.
+-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report title — change this line</title>
+<style>
+/* ── TOKENS ────────────────────────────────────────────────────────────── */
+:root{
+  /* ground and ink — nudged slightly toward the accent, not neutral gray */
+  --paper:#F6F7F9;  --surface:#FFFFFF;  --raised:#EDEFF3;
+  --ink:#12161F;    --body:#2C3340;     --muted:#5A6474;  --line:#D9DDE4;
+  /* accents — CHANGE TO FIT THE REPORT (or apply a styling preset) */
+  --accent:#17427A;      --accent-soft:#DCE5F1;
+  --accent-2:#8A5D0E;    --accent-2-soft:#F0E6D0;
+  /* semantic — use only when the report has a met/not-met status */
+  --good:#1F6B45;  --warn:#8A6410;  --bad:#9B2C2C;
+
+  /* type scale — h2/body ratio = 1.95 */
+  --t-body:16.5px;  --t-small:13.5px;  --t-eyebrow:11.5px;
+  --t-h3:19px;      --t-h2:32px;       --t-h1:clamp(2.1rem,5vw,3.3rem);
+  --measure:68ch;
+
+  --serif:ui-serif,Georgia,"Iowan Old Style","Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F131A;  --surface:#161B24;  --raised:#1E242F;
+    --ink:#E8EBF1;    --body:#C2C9D4;     --muted:#8B95A5;  --line:#2A313D;
+    --accent:#7FA8DE;      --accent-soft:#1B2B44;
+    --accent-2:#D9A845;    --accent-2-soft:#332914;
+    --good:#5CB98A;  --warn:#D9A845;  --bad:#E08585;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F131A;  --surface:#161B24;  --raised:#1E242F;
+  --ink:#E8EBF1;    --body:#C2C9D4;     --muted:#8B95A5;  --line:#2A313D;
+  --accent:#7FA8DE;      --accent-soft:#1B2B44;
+  --accent-2:#D9A845;    --accent-2-soft:#332914;
+  --good:#5CB98A;  --warn:#D9A845;  --bad:#E08585;
+}
+
+/* ── FOUNDATION ────────────────────────────────────────────────────────── */
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--body);
+  font:400 var(--t-body)/1.65 var(--sans); -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px; margin:0 auto; padding:0 28px 96px}
+.prose{max-width:var(--measure)}
+
+h1,h2,h3{font-family:var(--serif); color:var(--ink); font-weight:600; text-wrap:balance}
+h1{font-size:var(--t-h1); line-height:1.1; letter-spacing:-.02em; margin:0 0 18px}
+h2{font-size:var(--t-h2); line-height:1.2; margin:0 0 8px}      /* 32 / 16.5 = 1.95 */
+h3{font-size:var(--t-h3); line-height:1.3; margin:0 0 8px}
+p{margin:0 0 16px}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.eyebrow{
+  font:600 var(--t-eyebrow)/1 var(--mono); letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 14px;
+}
+.sub{color:var(--muted); font-size:14.5px; margin:-2px 0 20px; max-width:var(--measure)}
+.lede{font-size:1.15rem; max-width:var(--measure)}
+.meta{font-size:var(--t-small); color:var(--muted)}
+.note{font-size:var(--t-small); color:var(--muted); margin-top:12px; max-width:var(--measure)}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.hi{color:var(--ink); font-weight:600}
+
+/* ── LAYOUT ────────────────────────────────────────────────────────────── */
+.block{padding:40px 0; border-bottom:1px solid var(--line)}
+.block:last-child{border-bottom:none}
+.two{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:28px}
+.three{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px}
+.align-center{align-items:center}
+
+.cover{padding:72px 0 30px; border-bottom:2px solid var(--ink); margin-bottom:8px}
+.divider{
+  padding:40px 0; margin:16px 0; border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line); text-align:center;
+}
+.divider h2{margin:0}
+
+.card{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:3px; padding:20px 22px;
+}
+.card h3{margin-bottom:6px}
+.card p{margin:0; font-size:15px}
+
+/* ── KPIs ──────────────────────────────────────────────────────────────── */
+.kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:18px}
+.kpi{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:3px; padding:18px 20px; display:flex; flex-direction:column; gap:4px;
+}
+.kpi .v{
+  font:600 1.9rem/1.05 var(--serif); color:var(--ink);
+  font-variant-numeric:tabular-nums;
+}
+.kpi .l{font-size:12.5px; color:var(--muted)}
+.kpi .d{font-family:var(--mono); font-size:12px; color:var(--muted); margin-top:4px}
+.kpi .d.up{color:var(--good)} .kpi .d.down{color:var(--bad)}
+
+/* ── TABLES ────────────────────────────────────────────────────────────── */
+.tw{overflow-x:auto; border:1px solid var(--line); border-radius:3px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:14px; min-width:520px}
+caption{
+  text-align:left; padding:12px 14px 0; font-size:var(--t-small); color:var(--muted);
+}
+th,td{padding:9px 14px; text-align:left; border-bottom:1px solid var(--line)}
+thead th{
+  font:600 11px/1.3 var(--mono); letter-spacing:.08em; text-transform:uppercase;
+  color:var(--muted); background:var(--raised); white-space:nowrap; vertical-align:bottom;
+}
+tbody tr:last-child td{border-bottom:none}
+tbody tr.total td{border-top:2px solid var(--ink); font-weight:600; color:var(--ink)}
+td.n,th.n{
+  text-align:right; font-family:var(--mono);
+  font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+
+/* ── CALLOUT ───────────────────────────────────────────────────────────── */
+.callout{
+  background:var(--accent-soft); border-left:3px solid var(--accent);
+  padding:18px 22px; border-radius:0 3px 3px 0; margin:24px 0;
+}
+.callout p{margin:0; color:var(--ink)}
+.callout.alt{background:var(--accent-2-soft); border-left-color:var(--accent-2)}
+
+/* ── FIGURES ───────────────────────────────────────────────────────────── */
+.fig,.chart{margin:0}
+.fig img{width:100%; height:auto; display:block; border-radius:3px}
+.fig figcaption,.chart figcaption{
+  font-size:12.5px; color:var(--muted); margin-top:8px;
+}
+.chart svg{width:100%; height:auto; display:block}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important; transition:none !important}
+}
+
+/* ── PRINT TO PDF ──────────────────────────────────────────────────────── */
+@media print{
+  @page{size:A4; margin:16mm 14mm}
+  :root{
+    --paper:#FFF; --surface:#FFF; --raised:#F2F3F6;
+    --ink:#000; --body:#1A1A1A; --muted:#555; --line:#CCC;
+  }
+  body{font-size:10.5pt; line-height:1.5}
+  .wrap{max-width:none; padding:0}
+  h1{font-size:26pt} h2{font-size:20.5pt} h3{font-size:12.5pt}  /* keep ~1.95 ratio */
+  .block{page-break-inside:auto; border-bottom:none; padding:18pt 0}
+  .divider,.cover{page-break-after:always}
+  h1,h2,h3{page-break-after:avoid}
+  table{page-break-inside:auto}
+  tr,.kpi,.card,.callout,figure{page-break-inside:avoid}
+  thead{display:table-header-group}
+  .tw{overflow:visible; border:1px solid #CCC}
+  a{color:#000; text-decoration:none}
+  a[href^="http"]::after{content:" (" attr(href) ")"; font-size:8pt; color:#666}
+}
+</style>
+
+<div class="wrap">
+
+  <!-- COVER — archetype `cover`, grid full_bleed/centered_focal -->
+  <header class="cover">
+    <p class="eyebrow">Report type · period</p>
+    <h1>Report title</h1>
+    <p class="lede">One sentence stating the question this report answers and what the reader should do after reading it.</p>
+    <p class="meta mono">Issuer · Audience · Date</p>
+  </header>
+
+  <!-- HEADLINE KPIs — place early; no report type in the corpus opens with a table -->
+  <section class="block">
+    <div class="kpis">
+      <div class="kpi">
+        <span class="v">—</span><span class="l">Metric label</span>
+        <span class="d up">vs. benchmark</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- BODY — synthesis charts and argument -->
+  <section class="block">
+    <p class="eyebrow">Section one</p>
+    <h2>A takeaway title, not just a description</h2>
+    <p class="sub">One line framing this section.</p>
+    <div class="two">
+      <figure class="chart"><!-- SVG --></figure>
+      <div class="prose"><p>Explain the cause. Do not restate numbers already on the chart.</p></div>
+    </div>
+  </section>
+
+  <!-- APPENDIX — detailed figures pushed to the end -->
+  <section class="block">
+    <p class="eyebrow">Appendix</p>
+    <h2>Detailed figures</h2>
+    <div class="tw">
+      <table>
+        <caption>Unit: $M</caption>
+        <thead><tr><th>Item</th><th class="n">Plan</th><th class="n">Actual</th></tr></thead>
+        <tbody>
+          <tr><td>—</td><td class="n">—</td><td class="n">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
