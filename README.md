@@ -2,7 +2,9 @@
 
 A Claude Code plugin that builds and redesigns **slide decks and reports for management
 audiences** — board, C-level, BU heads, functional leaders. Every design choice is
-*measured* from a corpus of 236 real reports (17,947 pages), not guessed.
+*measured* from a corpus of **236 real reports (17,947 pages)**, not guessed.
+
+![manager-slides — measured deck and report design](docs/gallery.png)
 
 Two skills:
 
@@ -27,10 +29,17 @@ ratio at 1.9.
 1. **Design Read** — the skill classifies audience, purpose, and format in one line.
 2. **Elicit only the gaps** — one short question round for what it can't infer. Style is a
    *composite* derived from the Design Read, not a single "make it McKinsey" dropdown.
-3. **Look up measured constants** — density, hierarchy, dominant archetypes, chart-title
-   style per audience/purpose.
+3. **Look up measured constants** — density, hierarchy, dominant archetypes, and
+   chart-title style per audience/purpose.
 4. **Build** — map content to page archetypes; render with one of four engines.
 5. **Render and self-inspect** — screenshot both themes, look, fix, deliver.
+
+## Redesign: same content, better design
+
+`/manager-slide-redesign` preserves the wording and numbers, then rebuilds hierarchy,
+archetype fit, ordering, and color:
+
+![before and after — manager-slide-redesign](docs/redesign.png)
 
 ## Outputs
 
@@ -46,6 +55,51 @@ Three token-only presets (the layout rules never change): **Consulting** (defaul
 grid, navy, tabular), **Editorial** (serif headers, warm neutral), **Keynote** (big type,
 high contrast, dark-capable). A user-supplied brand guideline overrides the preset tokens.
 
+## Corpus & sources
+
+The design rules are measured from **236 documents / 17,947 pages** that were collected and
+page-tagged. Composition:
+
+| Set | Docs | What |
+|---|---:|---|
+| S&P 500 filings | 139 | 30 annual reports · 36 earnings decks · 28 investor decks · 45 ESG reports, across 49 companies |
+| Startup pitch & strategy decks | 50 | Seed-to-IPO decks studied in public teardowns |
+| Institutional & reference reports | 47 | Consulting, public-sector, design-award annual reports, brand guidelines |
+
+**Startup & scale-up decks** — Airbnb · Uber · Dropbox · Coinbase · Snapchat · Shopify ·
+Square · Peloton · WeWork · Intercom · Front · Buffer · Mixpanel · N26 · Careem · Oscar ·
+Foursquare · Tinder · LinkedIn · YouTube · Facebook · Pendo · Moz · Carta · Crunchbase ·
+Wunderlist · Aircall · Alan · Almanac · Castle · Verbit · OpenFin · Rocket Internet ·
+Atomwise · ArangoDB · MySQL · and more.
+
+**Consulting & research** — McKinsey Global Institute · BCG · Bain · Deloitte · PwC (CEO
+Survey) · Accenture · Stanford AI Index.
+
+**Institutional & public sector** — World Bank (GEP, PAD) · IMF (WEO) · Gates Foundation
+(Goalkeepers) · U.S. GAO · U.K. NAO · NASA · NHS board packs.
+
+**Design-award annual reports** — Porsche AG · Sanrio · Titan · Tata Consumer · OMV ·
+Austrian Post · Evonik · Garanti BBVA · LTIMindtree · Marui Group · Hindustan Zinc ·
+HELLENiQ Energy · s IMMO.
+
+**Brand guidelines** — Adidas · IKEA · LEGO · Spotify.
+
+<details>
+<summary><b>Full S&P 500 company list (49)</b></summary>
+
+AbbVie · Adobe · Alphabet · Amazon · American Express · American Tower · Apple ·
+Bank of America · BlackRock · Boeing · Broadcom · Caterpillar · Chevron · Coca-Cola ·
+Costco · Duke Energy · Eli Lilly · ExxonMobil · GE Aerospace · Goldman Sachs · Home Depot ·
+Honeywell · Intel · Johnson & Johnson · JPMorgan Chase · Linde · Lockheed Martin ·
+Mastercard · McDonald's · Meta · Microsoft · Morgan Stanley · Nike · Nvidia · PepsiCo ·
+Pfizer · Procter & Gamble · Prologis · RTX · Salesforce · Sherwin-Williams · Southern
+Company · Tesla · Thermo Fisher · UnitedHealth · Union Pacific · UPS · Visa · Walt Disney
+
+*Reports are the companies' own public filings; company names belong to their respective
+owners and are listed here only to document the study corpus.*
+
+</details>
+
 ## Layout
 
 ```
@@ -59,6 +113,7 @@ shared/                       # both skills read this
   assets/{deck.html, report.html, shell.typ}
   scripts/{render.py, deck_to_pdf.py}
 examples/                     # rendered proof decks
+docs/                         # gallery images
 ```
 
 ## Dependencies
